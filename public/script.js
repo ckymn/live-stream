@@ -89,8 +89,6 @@ const muteButton = document.querySelector('#muteButton');
 const stopVideo = document.querySelector('#stopVideo');
 muteButton.addEventListener('click', () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
-  console.log('videstream ->', myVideoStream);
-  console.log('enabled ->', enabled);
   if (enabled) {
     myVideoStream.getAudioTracks()[0].enabled = false;
     html = `<i class="fas fa-microphone-slash"></i>`;

@@ -14,16 +14,18 @@
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <script>
     const ROOM_ID = '<%=roomId%>';
-    // socket connection to the server from browser
-    const socket = io("https://jotform-video-stream.herokuapp.com/");
-    // Peerjs connection to the server from browser
-    const peer = new Peer(undefined, {
+
+    // socket.io Client connection
+    const URL = "http://localhost:3000";
+    const socket = io(URL);
+    
+    // peer.js Client connection
+    var peer = new Peer(undefined, {
       host: '/',
       path: '/peerjs',
-      port: 443,
+      port: 3000,
     });
 
-    console.log('socket =>', socket)
   </script>
 </head>
 
@@ -33,7 +35,7 @@
       <div class="header__back">
         <i class="fas fa-angle-left"></i>
       </div>
-      <h3>Jotform Vide Streaming</h2>
+      <h3>Jotform Live Streaming</h2>
     </div>
   </div>
   <div class="main">
