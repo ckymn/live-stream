@@ -16,14 +16,14 @@
     const ROOM_ID = '<%=roomId%>';
 
     // socket.io Client connection
-    const URL = "http://localhost:3000";
+    const URL = "https://livee-stream.herokuapp.com/";
     const socket = io(URL);
     
     // peer.js Client connection
     var peer = new Peer(undefined, {
       host: '/',
       path: '/peerjs',
-      port: 3000,
+      port: 443,
     });
 
   </script>
