@@ -49,12 +49,22 @@ peer.on('open', (id) => {
 socket.emit('join-room', { ROOM_ID, user });
 
 socket.on('user-connected', (data) => {
+  messages.innerHTML =
+    messages.innerHTML +
+    `<li style="text-align: center; padding-bottom: 5px;"> 
+      <i class="far fa-user-circle" style="color: yellow"></i> 
+      <span style="color: white"> ${data.userName} is connected</span>
+    </li>`;
   userList.push(data);
-  console.log(`${data.userName} is connected client`);
 });
 
 socket.on('user-disconnected', (data) => {
-  console.log(`${data.userName} is disconnected client`);
+  messages.innerHTML =
+    messages.innerHTML +
+    `<li style="text-align: center; padding-bottom: 5px;"> 
+      <i class="far fa-user-circle" style="color: red"></i> 
+      <span style="color: white"> ${data.userName} is disconnected</span>
+    </li>`;
 
   const index = userList.findIndex((i) => i.userId === data.userId);
   if (index !== -1) {
@@ -101,6 +111,8 @@ text.addEventListener('keydown', (e) => {
 });
 
 const inviteButton = document.querySelector('#inviteButton');
+const showUsers = document.querySelector('#showUsers');
+const showUserLength = document.querySelector('#showUsers i');
 const muteButton = document.querySelector('#muteButton');
 const stopVideo = document.querySelector('#stopVideo');
 muteButton.addEventListener('click', () => {
@@ -140,4 +152,22 @@ inviteButton.addEventListener('click', (e) => {
     'Copy this link and send it to people you want to meet with',
     window.location.href
   );
+});
+
+showUsers.addEventListener('click', (e) => {
+  showUserLength.innerHTML = userList.length;
+  const x = document.querySelector('.users');
+  let html = '';
+  userList.forEach((user) => {
+    html += `<div class="user">
+      <b><i class="far fa-user-circle"></i> <span> ${user.userName}</span> </b>
+    </div>`;
+  });
+  x.innerHTML = html;
+
+  if (x.style.display === 'none') {
+    x.style.display = 'block';
+  } else {
+    x.style.display = 'none';
+  }
 });

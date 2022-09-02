@@ -38,22 +38,25 @@ server.listen(PORT, () => {
   io.on('connection', (socket) => {
     console.log(`${socket.id} is connected server`);
     userList.push(socket.id);
+    console.log(userList);
 
     // connect room
-    socket.on('join-room', (data) => {
-      socket.join(data.ROOM_ID);
+    socket.on('join-room', ({ ROOM_ID, user }) => {
+      socket.join(ROOM_ID);
 
-      socket.broadcast.to(data.ROOM_ID).emit('user-connected', {
+      io.to(ROOM_ID).emit('user-connected', {
         userId: socket.id,
-        userName: data.user,
+        userName: user,
       });
 
       socket.on('message', (message) => {
-        io.to(data.ROOM_ID).emit('createMessage', message, data.user);
+        io.to(ROOM_ID).emit('createMessage', message, user);
       });
 
+      io.to(ROOM_ID).emit('userList', userList);
+
       // leave room
-      socket.on('disconnecting', (reason) => {
+      socket.on('disconnect', (reason) => {
         console.log(`${socket.id} is disconnecting server`);
 
         const index = userList.indexOf(socket.id);
@@ -61,9 +64,9 @@ server.listen(PORT, () => {
           userList.splice(index, 1);
         }
 
-        io.to(data.ROOM_ID).emit('user-disconnected', {
+        io.to(ROOM_ID).emit('user-disconnected', {
           userId: socket.id,
-          userName: data.user,
+          userName: user,
         });
       });
     });

@@ -70,6 +70,7 @@ video {
 }
 
 .options__right {
+  display: flex;
   margin-left: auto;
 }
 
@@ -152,6 +153,36 @@ video {
   border-radius: 5px;
 }
 
+.users {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.user {
+  display: flex;
+  flex-direction: column;
+}
+
+.user > b {
+  color: black;
+  display: flex;
+  align-items: center;
+  text-transform: capitalize;
+}
+
+.user > b > i {
+  color: yellow;
+  margin-right: 0.7rem;
+  font-size: 1.5rem;
+}
+
+.user > b > span {
+  background-color: #eeeeee;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 5px;
+}
 #video-grid {
   display: flex;
   justify-content: center;
