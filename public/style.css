@@ -189,10 +189,6 @@ video {
   flex-wrap: wrap;
 }
 
-#showChat {
-  display: none;
-}
-
 .header__back {
   display: none;
   position: absolute;

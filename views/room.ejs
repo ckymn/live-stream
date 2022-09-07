@@ -11,6 +11,7 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.1.2/simplepeer.min.js"></script>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <script>
     const ROOM_ID = '<%=roomId%>';
@@ -19,13 +20,6 @@
     const URL = "https://livee-stream.herokuapp.com/";
     const socket = io(URL);
     
-    // peer.js Client connection
-    var peer = new Peer(undefined, {
-      host: '/',
-      path: '/peerjs',
-      port: 443,
-    });
-
   </script>
 </head>
 
@@ -41,9 +35,7 @@
   <div class="main">
     <div class="main__left">
       <div class="videos__group">
-        <div id="video-grid">
-
-        </div>
+        <div id="video-grid"></div>
       </div>
       <div class="options">
         <div class="options__left">
@@ -55,6 +47,9 @@
           </div>
           <div id="showChat" class="options__button">
             <i class="fa fa-comment"></i>
+          </div>
+          <div id="showScreen" class="options__button">
+            <i class="fa fa-desktop"></i>
           </div>
         </div>
         <div class="options__right">

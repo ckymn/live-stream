@@ -55,6 +55,14 @@ server.listen(PORT, () => {
 
       io.to(ROOM_ID).emit('userList', userList);
 
+      socket.on('offer', (data) => {
+        socket.broadcast.emit('offer', data);
+      });
+
+      socket.on('initiate', () => {
+        io.emit('initiate');
+      });
+
       // leave room
       socket.on('disconnect', (reason) => {
         console.log(`${socket.id} is disconnecting server`);
