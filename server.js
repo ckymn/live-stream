@@ -1,20 +1,17 @@
 require('dotenv').config();
-const { v4: uuidv4 } = require('uuid');
-const PORT = process.env.PORT || 5000;
 const express = require('express');
 const app = express();
-const http = require('http');
-const { ExpressPeerServer } = require('peer');
-
-const server = http.createServer(app);
-
+const server = require('http').Server(app);
+const { v4: uuidv4 } = require('uuid');
 const io = require('socket.io')(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST', 'OPTIONS'],
   },
 });
+const PORT = process.env.PORT || 5000;
 
+const { ExpressPeerServer } = require('peer');
 const peerServer = ExpressPeerServer(server, {
   debug: true,
 });
@@ -32,51 +29,41 @@ app.get('/:room', (req, res) => {
 });
 
 const userList = [];
-server.listen(PORT, () => {
-  console.log(`Server is running on ${PORT}`);
+// connection socket.io
+io.on('connection', (socket) => {
+  userList.push(socket.id);
+  // listen the room from the browser.
+  socket.on('join-room', (roomId, userId, userName) => {
+    socket.join(roomId);
+    // stream to everyobody
+    io.to(roomId).emit('user-connected', {
+      userId,
+      userName,
+    });
+    // listen the message from the browser.
+    socket.on('message', (message) => {
+      io.to(roomId).emit('createMessage', message, userName);
+    });
 
-  io.on('connection', (socket) => {
-    console.log(`${socket.id} is connected server`);
-    userList.push(socket.id);
-    console.log(userList);
+    io.to(roomId).emit('userList', userList);
 
-    // connect room
-    socket.on('join-room', ({ ROOM_ID, user }) => {
-      socket.join(ROOM_ID);
+    // leave room
+    socket.on('disconnect', (reason) => {
+      console.log(`${socket.id} is disconnecting server`);
 
-      io.to(ROOM_ID).emit('user-connected', {
-        userId: socket.id,
-        userName: user,
-      });
+      const index = userList.indexOf(socket.id);
+      if (index > -1) {
+        userList.splice(index, 1);
+      }
 
-      socket.on('message', (message) => {
-        io.to(ROOM_ID).emit('createMessage', message, user);
-      });
-
-      io.to(ROOM_ID).emit('userList', userList);
-
-      socket.on('offer', (data) => {
-        socket.broadcast.emit('offer', data);
-      });
-
-      socket.on('initiate', () => {
-        io.emit('initiate');
-      });
-
-      // leave room
-      socket.on('disconnect', (reason) => {
-        console.log(`${socket.id} is disconnecting server`);
-
-        const index = userList.indexOf(socket.id);
-        if (index > -1) {
-          userList.splice(index, 1);
-        }
-
-        io.to(ROOM_ID).emit('user-disconnected', {
-          userId: socket.id,
-          userName: user,
-        });
+      io.to(roomId).emit('user-disconnected', {
+        userId,
+        userName,
       });
     });
   });
+});
+
+server.listen(PORT, () => {
+  console.log(`Server is running on ${PORT}`);
 });

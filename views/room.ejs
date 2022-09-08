@@ -11,15 +11,17 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.1.2/simplepeer.min.js"></script>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <script>
-    const ROOM_ID = '<%=roomId%>';
-
-    // socket.io Client connection
-    const URL = "https://livee-stream.herokuapp.com/";
-    const socket = io(URL);
-    
+   const ROOM_ID = '<%=roomId%>';
+    // socket connection to the server from browser
+    const socket = io("http://localhost:3000");
+    // Peerjs connection to the server from browser
+    const peer = new Peer(undefined, {
+      host: '/',
+      path: '/peerjs',
+      port: 3000,
+    });
   </script>
 </head>
 
