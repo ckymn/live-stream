@@ -5,10 +5,17 @@ const showScreen = document.getElementById('showScreen');
 const messages = document.querySelector('.messages');
 const text = document.querySelector('#chat_message');
 const send = document.getElementById('send');
+const inviteButton = document.querySelector('#inviteButton');
+const muteButton = document.querySelector('#muteButton');
+const stopVideo = document.querySelector('#stopVideo');
+const record = document.getElementById('record');
 myVideo.muted = true;
 
 const userList = [];
 var currentPeer = null;
+var isRecording = false;
+let mediaRecorder;
+let recordedBlobs;
 const user = prompt('Enter your name');
 
 let myVideoStream;
@@ -162,9 +169,6 @@ text.addEventListener('keydown', (e) => {
   }
 });
 
-const inviteButton = document.querySelector('#inviteButton');
-const muteButton = document.querySelector('#muteButton');
-const stopVideo = document.querySelector('#stopVideo');
 muteButton.addEventListener('click', () => {
   const enabled = myVideoStream.getAudioTracks()[0].enabled;
   if (enabled) {
@@ -227,3 +231,119 @@ showUsers.addEventListener('click', (e) => {
     x.style.display = 'none';
   }
 });
+
+// record
+record.addEventListener('click', (e) => {
+  !isRecording ? startRecording() : stopRecording();
+});
+
+function handleDataAvailable(event) {
+  console.log('handleDataAvailable', event);
+  if (event.data && event.data.size > 0) {
+    recordedBlobs.push(event.data);
+  }
+}
+// start recording
+const startRecording = () => {
+  const VIDEO_WIDTH = 1280;
+  const VIDEO_HEIGHT = 1024;
+  var numStreams = 0;
+  var curStream = 0;
+
+  var merger = new VideoStreamMerger({
+    width: VIDEO_WIDTH,
+    height: VIDEO_HEIGHT,
+  });
+
+  merger.start();
+
+  document.getElementById('iconRecord').className = 'fa fa-square';
+  document.getElementById('recordLabel').innerText = 'Stop Recording';
+
+  const videoList = document.querySelectorAll('video');
+
+  const videTags = [...videoList]; // converts NodeList to Array
+  videTags.forEach((video) => {
+    const curStream = numStreams;
+    merger.addStream(video.srcObject, {
+      mute: numStreams > 0,
+      draw: function (ctx, frame, done) {
+        if (curStream >= numStreams) curStream = 0;
+
+        ctx.drawImage(
+          frame,
+          VIDEO_WIDTH * curStream,
+          0,
+          VIDEO_WIDTH,
+          VIDEO_HEIGHT
+        );
+
+        done();
+      },
+    });
+
+    numStreams++;
+    merger.setOutputSize(numStreams * VIDEO_WIDTH, VIDEO_HEIGHT);
+  });
+
+  isRecording = true;
+  recordedBlobs = [];
+  const mimeType = 'video/webm;codecs=vp9,opus';
+  const options = { mimeType };
+
+  try {
+    mediaRecorder = new MediaRecorder(merger.result, options);
+  } catch (e) {
+    console.error('Exception while creating MediaRecorder:', e);
+    errorMsgElement.innerHTML = `Exception while creating MediaRecorder: ${JSON.stringify(
+      e
+    )}`;
+    return;
+  }
+
+  console.log(
+    'Created MediaRecorder',
+    mediaRecorder,
+    'with options',
+    options
+  );
+
+  mediaRecorder.onstop = (event) => {
+    console.log('Recorder stopped: ', event);
+    console.log('Recorded Blobs: ', recordedBlobs);
+    downloadFile();
+    isRecording = false;
+    merger.destroy();
+  };
+
+  mediaRecorder.ondataavailable = handleDataAvailable;
+  mediaRecorder.start();
+  console.log('MediaRecorder started', mediaRecorder);
+};
+
+// stop recording
+function stopRecording() {
+  document.getElementById('iconRecord').className = 'fa fa-circle';
+  document.getElementById('recordLabel').innerText =
+    'Start Recording';
+  mediaRecorder.stop();
+}
+
+// file download
+function downloadFile() {
+  //Download file
+  const blob = new Blob(recordedBlobs, { type: 'video/webm' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  var datetime = new Date();
+
+  a.download = datetime + 'Session.webm';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }, 100);
+}
