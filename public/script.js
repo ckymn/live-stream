@@ -215,12 +215,13 @@ showChat.addEventListener('click', () => {
 
 // show users and values
 showUsers.addEventListener('click', (e) => {
+  const showUserLength = document.querySelector('#showUserLength');
   showUserLength.innerHTML = userList.length;
   const x = document.querySelector('.users');
   let html = '';
   userList.forEach((user) => {
     html += `<div class="user">
-      <b><i class="far fa-user-circle"></i> <span> ${user.userName}</span> </b>
+      <b><i class="far fa-user-circle"></i> <small> ${user.userName}</small> </b>
     </div>`;
   });
   x.innerHTML = html;
@@ -233,8 +234,51 @@ showUsers.addEventListener('click', (e) => {
 });
 
 // record
-record.addEventListener('click', (e) => {
-  !isRecording ? startRecording() : stopRecording();
+record.addEventListener('click', async (e) => {
+  // !isRecording ? startRecording() : stopRecording();
+
+  async function recordScreen() {
+    return await navigator.mediaDevices.getDisplayMedia({
+      audio: true,
+      video: { mediaSource: 'screen' },
+    });
+  }
+
+  function createRecorder(stream, mimeType) {
+    let recordedChunks = [];
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        recordedChunks.push(e.data);
+      }
+    };
+    mediaRecorder.onstop = (e) => {
+      saveFile(recordedChunks);
+      recordedChunks = [];
+    };
+    mediaRecorder.start(2000);
+    return mediaRecorder;
+  }
+
+  function saveFile(recordedChunks) {
+    const blob = new Blob(recordedChunks, {
+      type: 'video/webm',
+    });
+    let filename = window.prompt('Enter a file name');
+    let downloadLink = document.createElement('a');
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = `${filename}.webm`;
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    URL.revokeObjectURL(blob);
+    document.body.removeChild(downloadLink);
+  }
+
+  let stream = await recordScreen();
+  let mimeType = 'video/webm';
+  let mediaRecorder = createRecorder(stream, mimeType);
+  mediaRecorder.stop();
 });
 
 function handleDataAvailable(event) {

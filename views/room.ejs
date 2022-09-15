@@ -12,6 +12,7 @@
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  <script src="dist/video-stream-merger.js"></script>
   <script>
    const ROOM_ID = '<%=roomId%>';
     // socket connection to the server from browser
@@ -61,7 +62,7 @@
             <i class="fas fa-user-plus"></i>
           </div>
           <div id="showUsers" class="options__button">
-            <i class="fas fa-user"></i>
+            <i class="fas fa-user" id='showUserLength'></i>
           </div>
         </div>
       </div>
